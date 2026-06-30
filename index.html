@@ -366,28 +366,43 @@ return `
 
 function complexDiagram(){
 return `
-<svg width="620" height="420" viewBox="0 0 620 420" role="img">
+<svg width="620" height="420" viewBox="0 0 620 420" role="img" aria-label="Segment addition and substitution proof diagram">
 <rect width="620" height="420" fill="#fff"/>
-<polyline points="95,75 350,90 325,210 445,295 310,380 230,185 95,75" fill="none" stroke="#1f9d23" stroke-width="4"/>
-<line x1="95" y1="75" x2="445" y2="295" stroke="#1f9d23" stroke-width="4"/>
-<text x="70" y="75" font-size="22" font-weight="bold">H</text>
-<text x="365" y="92" font-size="22" font-weight="bold">I</text>
-<text x="325" y="220" font-size="22" font-weight="bold">J</text>
-<text x="448" y="310" font-size="22" font-weight="bold">K</text>
-<text x="295" y="400" font-size="22" font-weight="bold">F</text>
-<text x="210" y="185" font-size="22" font-weight="bold">G</text>
 
-<path d="M118 78 A38 38 0 0 1 112 115" fill="none" stroke="red" stroke-width="4"/>
-<path d="M246 192 A38 38 0 0 0 265 225" fill="none" stroke="red" stroke-width="4"/>
+<!-- Triangle HIJ -->
+<polyline points="110,80 420,95 335,235 110,80" fill="none" stroke="#1f9d23" stroke-width="4"/>
 
-<path d="M318 196 A32 32 0 0 1 355 205" fill="none" stroke="red" stroke-width="4"/>
-<path d="M424 284 A32 32 0 0 1 442 255" fill="none" stroke="red" stroke-width="4"/>
+<!-- Triangle GFK -->
+<polyline points="255,205 380,370 500,290 255,205" fill="none" stroke="#1f9d23" stroke-width="4"/>
 
-<line x1="145" y1="110" x2="155" y2="122" stroke="red" stroke-width="4"/>
-<line x1="382" y1="256" x2="392" y2="268" stroke="red" stroke-width="4"/>
+<!-- Shared diagonal line H-G-J-K -->
+<line x1="110" y1="80" x2="500" y2="290" stroke="#1f9d23" stroke-width="4"/>
+
+<!-- Labels -->
+<text x="85" y="78" font-size="22" font-weight="bold">H</text>
+<text x="430" y="95" font-size="22" font-weight="bold">I</text>
+<text x="338" y="250" font-size="22" font-weight="bold">J</text>
+<text x="505" y="300" font-size="22" font-weight="bold">K</text>
+<text x="372" y="395" font-size="22" font-weight="bold">F</text>
+<text x="232" y="210" font-size="22" font-weight="bold">G</text>
+
+<!-- Single angle marks: ∠IHJ and ∠FGK -->
+<path d="M137 82 A34 34 0 0 1 128 116" fill="none" stroke="red" stroke-width="4"/>
+<path d="M270 225 A34 34 0 0 0 295 210" fill="none" stroke="red" stroke-width="4"/>
+
+<!-- Double angle marks: ∠HJI and ∠FKG -->
+<path d="M323 222 A30 30 0 0 1 354 213" fill="none" stroke="red" stroke-width="4"/>
+<path d="M328 228 A36 36 0 0 1 362 220" fill="none" stroke="red" stroke-width="4"/>
+
+<path d="M474 284 A30 30 0 0 1 490 253" fill="none" stroke="red" stroke-width="4"/>
+<path d="M467 280 A36 36 0 0 1 485 246" fill="none" stroke="red" stroke-width="4"/>
+
+<!-- Congruent segment marks: GH and JK -->
+<line x1="178" y1="112" x2="168" y2="129" stroke="red" stroke-width="4"/>
+<line x1="418" y1="247" x2="408" y2="264" stroke="red" stroke-width="4"/>
+
 </svg>`;
 }
-
 load();
 </script>
 </body>
