@@ -253,11 +253,14 @@ correct=false;
 });
 
 const f=document.getElementById("feedback");
+f.style.display="block";
+
 if(missing){
 f.className="feedback incorrect";
 f.innerHTML="Choose an answer for every blank before checking your proof.";
 return;
 }
+
 if(correct){
 f.className="feedback correct";
 f.innerHTML="✅ Correct! The proof is complete and the reasoning is valid.";
@@ -269,9 +272,11 @@ f.innerHTML="🔎 Not quite yet. Check the missing statement or reason. Ask: Wha
 
 function showHint(){
 const f=document.getElementById("feedback");
+f.style.display="block";
 f.className="feedback incorrect";
 f.innerHTML="Hint: " + proofs[current].hint;
 }
+
 
 function nextProof(){
 if(current<proofs.length-1){
