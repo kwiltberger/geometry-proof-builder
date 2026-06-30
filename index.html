@@ -3,74 +3,102 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Proof Builder</title>
+<title>Proof Builder 2.0</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f0f7fb;color:#1f2933;margin:0;padding:20px}
-.container{max-width:1100px;margin:0 auto}
-.hero{background:#0f2d44;color:white;padding:24px;border-radius:12px;text-align:center}
-.card{background:white;border-left:6px solid #2f80a8;padding:18px;border-radius:10px;margin-top:18px}
-.green{background:#eefaf1;border-left-color:#3ca65c}
-.yellow{background:#fff8e6;border-left-color:#f2b705}
-.purple{background:#f3e5f5;border-left-color:#9c64a6}
-button{background:#0f2d44;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin:6px}
+:root{
+  --navy:#0f2d44;--blue:#2f80a8;--ltblue:#f0f7fb;--green:#3ca65c;--ltgreen:#eefaf1;
+  --yellow:#f2b705;--ltyellow:#fff8e6;--purple:#9c64a6;--ltpurple:#f3e5f5;
+  --red:#c0392b;--ltred:#fdecea;--gray:#d6e6ef;--text:#1f2933;
+}
+body{font-family:Arial,sans-serif;background:#f0f7fb;color:var(--text);margin:0;padding:20px}
+.container{max-width:1150px;margin:0 auto}
+.hero{background:var(--navy);color:white;padding:24px;border-radius:12px;text-align:center}
+.card{background:white;border-left:6px solid var(--blue);padding:18px;border-radius:10px;margin-top:18px}
+.green{background:var(--ltgreen);border-left-color:var(--green)}
+.yellow{background:var(--ltyellow);border-left-color:var(--yellow)}
+.purple{background:var(--ltpurple);border-left-color:var(--purple)}
+button{background:var(--navy);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin:6px}
 button:hover{background:#163d5c}
-.step{background:white;border:2px solid #d6e6ef;border-radius:8px;padding:10px;margin:8px 0;cursor:pointer}
-.step.selected{border-color:#2f80a8;background:#f0f7fb}
-.slot{min-height:42px;background:#f6f9fb;border:2px dashed #b8c7d1;border-radius:8px;padding:10px;margin:8px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+.diagram{background:white;border:1px solid var(--gray);border-radius:10px;text-align:center;padding:10px;overflow-x:auto}
+svg{max-width:100%;height:auto}
+.proof-card{background:white;border:2px solid var(--gray);border-radius:8px;padding:10px;margin:8px 0;cursor:grab}
+.proof-card.selected{border-color:var(--blue);background:var(--ltblue)}
+.slot{min-height:46px;background:#f6f9fb;border:2px dashed #b8c7d1;border-radius:8px;padding:10px}
+.slot.correct{background:var(--ltgreen);border-color:var(--green)}
+.slot.incorrect{background:var(--ltred);border-color:var(--red)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--navy);color:white}
+th,td{border:1px solid var(--gray);padding:10px;vertical-align:top}
 .feedback{display:none;padding:14px;border-radius:8px;margin-top:12px;font-weight:bold}
-.correct{display:block;background:#eefaf1;color:#1f6b35;border-left:6px solid #3ca65c}
-.incorrect{display:block;background:#fdecea;color:#8a1f11;border-left:6px solid #c0392b}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th{background:#0f2d44;color:white}
-th,td{border:1px solid #d6e6ef;padding:10px}
+.feedback.correct{display:block;background:var(--ltgreen);color:#1f6b35;border-left:6px solid var(--green)}
+.feedback.incorrect{display:block;background:var(--ltred);color:#8a1f11;border-left:6px solid var(--red)}
 .progress{height:18px;background:#d6e6ef;border-radius:999px;overflow:hidden}
-.fill{height:100%;width:0%;background:#3ca65c}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--blue))}
+.code{background:var(--navy);color:white;padding:12px 18px;border-radius:8px;display:inline-block;font-size:22px}
 </style>
 </head>
+
 <body>
-<div class="container">
+<div class="container" id="app">
 
 <div class="hero">
-<h1>🧩 Proof Builder</h1>
-<p>Build geometric proofs one logical step at a time.</p>
+<h1>🧩 Proof Builder 2.0</h1>
+<p>Build geometric proofs with evidence, logic, and corresponding parts.</p>
 </div>
 
 <div class="card">
-<h2 style="color:#0f2d44;margin-top:0;">Directions</h2>
-<p>Select a proof step, then select the slot where it belongs. Build the proof in the correct order.</p>
-<p>When all slots are filled, check your proof.</p>
+<h2 style="margin-top:0;color:var(--navy)">Directions</h2>
+<p>Select a proof card, then click the slot where it belongs.</p>
+<p><strong>Important:</strong> Given statements may be placed in any order, but the triangle congruence statement must come after the givens, and corresponding parts must come last.</p>
 </div>
 
 <div class="card yellow">
-<h2 id="caseTitle" style="color:#0f2d44;margin-top:0;">Proof 1</h2>
-<p id="casePrompt"></p>
+<h2 id="title" style="margin-top:0;color:var(--navy)"></h2>
+<p id="prompt"></p>
 <div class="progress"><div class="fill" id="fill"></div></div>
-<p id="progressText">Proof 1 of 5</p>
+<p id="progressText"></p>
 </div>
 
-<div class="card green">
-<h2 style="color:#0f2d44;margin-top:0;">Available Proof Steps</h2>
-<div id="steps"></div>
-</div>
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2 style="margin-top:0;color:var(--navy)">Diagram</h2>
+      <div class="diagram" id="diagram"></div>
+    </div>
 
-<div class="card purple">
-<h2 style="color:#0f2d44;margin-top:0;">Build the Proof</h2>
-<table>
-<tr><th>#</th><th>Statement</th><th>Reason</th></tr>
-<tbody id="proofSlots"></tbody>
-</table>
-<button onclick="checkProof()">Check Proof</button>
-<button onclick="clearProof()">Clear Proof</button>
-<button onclick="nextProof()">Next Proof</button>
-<button onclick="restart()">Restart</button>
-<div id="feedback" class="feedback"></div>
+    <div class="card green">
+      <h2 style="margin-top:0;color:var(--navy)">Evidence Cards</h2>
+      <div id="cards"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card purple">
+      <h2 style="margin-top:0;color:var(--navy)">Build the Proof</h2>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Statement and Reason</th></tr>
+        </thead>
+        <tbody id="slots"></tbody>
+      </table>
+
+      <button onclick="checkProof()">Would this convince another mathematician?</button>
+      <button onclick="clearProof()">Clear Proof</button>
+      <button onclick="nextProof()">Next Investigation</button>
+      <button onclick="restart()">Restart</button>
+
+      <div id="feedback" class="feedback"></div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-<h2 style="color:#0f2d44;margin-top:0;">Proof Builder Tips</h2>
+<h2 style="margin-top:0;color:var(--navy)">Proof Builder Reminders</h2>
 <p>☐ Start with the givens.</p>
-<p>☐ Use SSS, SAS, ASA, or AAS to prove triangles congruent.</p>
-<p>☐ Use corresponding parts only after triangles are proven congruent.</p>
+<p>☐ Use SSS, SAS, ASA, or AAS to prove the triangles congruent.</p>
+<p>☐ Use corresponding parts only after the triangles are proven congruent.</p>
 </div>
 
 </div>
@@ -78,175 +106,230 @@ th,td{border:1px solid #d6e6ef;padding:10px}
 <script>
 const proofs=[
 {
-title:"Proof 1: SAS Proof",
+title:"Investigation 1: SAS Proof",
 prompt:"Given AB ≅ DE, BC ≅ EF, and ∠B ≅ ∠E. Prove AC ≅ DF.",
-answer:[
+type:"sas",
+givens:[
 ["AB ≅ DE","Given"],
 ["BC ≅ EF","Given"],
-["∠B ≅ ∠E","Given"],
-["△ABC ≅ △DEF","SAS"],
-["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
-]
+["∠B ≅ ∠E","Given"]
+],
+congruence:["△ABC ≅ △DEF","SAS"],
+conclusion:["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
 },
 {
-title:"Proof 2: SSS Proof",
+title:"Investigation 2: SSS Proof",
 prompt:"Given MN ≅ QR, NP ≅ RS, and MP ≅ QS. Prove ∠N ≅ ∠R.",
-answer:[
+type:"sss",
+givens:[
 ["MN ≅ QR","Given"],
 ["NP ≅ RS","Given"],
-["MP ≅ QS","Given"],
-["△MNP ≅ △QRS","SSS"],
-["∠N ≅ ∠R","Corresponding parts of congruent triangles are congruent"]
-]
+["MP ≅ QS","Given"]
+],
+congruence:["△MNP ≅ △QRS","SSS"],
+conclusion:["∠N ≅ ∠R","Corresponding parts of congruent triangles are congruent"]
 },
 {
-title:"Proof 3: ASA Proof",
+title:"Investigation 3: ASA Proof",
 prompt:"Given ∠A ≅ ∠D, AB ≅ DE, and ∠B ≅ ∠E. Prove AC ≅ DF.",
-answer:[
+type:"asa",
+givens:[
 ["∠A ≅ ∠D","Given"],
 ["AB ≅ DE","Given"],
-["∠B ≅ ∠E","Given"],
-["△ABC ≅ △DEF","ASA"],
-["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
-]
+["∠B ≅ ∠E","Given"]
+],
+congruence:["△ABC ≅ △DEF","ASA"],
+conclusion:["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
 },
 {
-title:"Proof 4: AAS Proof",
+title:"Investigation 4: AAS Proof",
 prompt:"Given ∠J ≅ ∠L, ∠K ≅ ∠M, and JN ≅ LP. Prove JK ≅ LM.",
-answer:[
+type:"aas",
+givens:[
 ["∠J ≅ ∠L","Given"],
 ["∠K ≅ ∠M","Given"],
-["JN ≅ LP","Given"],
-["△JKN ≅ △LMP","AAS"],
-["JK ≅ LM","Corresponding parts of congruent triangles are congruent"]
-]
+["JN ≅ LP","Given"]
+],
+congruence:["△JKN ≅ △LMP","AAS"],
+conclusion:["JK ≅ LM","Corresponding parts of congruent triangles are congruent"]
 },
 {
-title:"Proof 5: Find the Logical Flow",
-prompt:"Given two pairs of sides and the included angle are congruent. Prove a corresponding side is congruent.",
-answer:[
+title:"Investigation 5: Mixed Challenge",
+prompt:"Given two sides and the included angle are congruent. Prove the final corresponding sides are congruent.",
+type:"sas",
+givens:[
 ["First pair of corresponding sides is congruent","Given"],
 ["Second pair of corresponding sides is congruent","Given"],
-["Included angles are congruent","Given"],
-["The triangles are congruent","SAS"],
-["The corresponding final sides are congruent","Corresponding parts of congruent triangles are congruent"]
-]
+["Included angles are congruent","Given"]
+],
+congruence:["The triangles are congruent","SAS"],
+conclusion:["The final corresponding sides are congruent","Corresponding parts of congruent triangles are congruent"]
 }
 ];
 
 let current=0;
-let selectedStep=null;
-let selectedIndex=null;
+let selected=null;
 let slots=[];
 
-function shuffle(arr){
-return arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
-}
+function shuffle(a){return a.map(x=>[Math.random(),x]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);}
 
-function loadProof(){
+function load(){
 const p=proofs[current];
-document.getElementById("caseTitle").textContent=p.title;
-document.getElementById("casePrompt").textContent=p.prompt;
-document.getElementById("progressText").textContent=`Proof ${current+1} of ${proofs.length}`;
-document.getElementById("fill").style.width=((current)/proofs.length*100)+"%";
-slots=Array(p.answer.length).fill(null);
-selectedStep=null;
-selectedIndex=null;
-
-const mixed=shuffle([...p.answer]);
-document.getElementById("steps").innerHTML=mixed.map((s,i)=>
-`<div class="step" onclick="selectStep(${i}, this)" data-statement="${s[0]}" data-reason="${s[1]}"><strong>${s[0]}</strong><br><em>${s[1]}</em></div>`
-).join("");
-
+document.getElementById("title").textContent=p.title;
+document.getElementById("prompt").textContent=p.prompt;
+document.getElementById("progressText").textContent=`Investigation ${current+1} of ${proofs.length}`;
+document.getElementById("fill").style.width=(current/proofs.length*100)+"%";
+document.getElementById("diagram").innerHTML=diagram(p.type);
+slots=Array(p.givens.length+2).fill(null);
+selected=null;
+const all=shuffle([...p.givens,p.congruence,p.conclusion]);
+document.getElementById("cards").innerHTML=all.map((c,i)=>`
+<div class="proof-card" onclick="selectCard(this)" data-statement="${c[0]}" data-reason="${c[1]}">
+<strong>${c[0]}</strong><br><em>${c[1]}</em>
+</div>`).join("");
 renderSlots();
 hideFeedback();
 }
 
 function renderSlots(){
-const tbody=document.getElementById("proofSlots");
-tbody.innerHTML="";
-slots.forEach((slot,i)=>{
-tbody.innerHTML+=`
+const body=document.getElementById("slots");
+body.innerHTML="";
+slots.forEach((s,i)=>{
+body.innerHTML+=`
 <tr>
 <td>${i+1}</td>
-<td colspan="2">
-<div class="slot" onclick="placeStep(${i})">
-${slot?`<strong>${slot[0]}</strong><br><em>${slot[1]}</em>`:"Click here to place a proof step"}
-</div>
-</td>
+<td><div class="slot" onclick="place(${i})" id="slot${i}">
+${s?`<strong>${s[0]}</strong><br><em>${s[1]}</em>`:"Click here to place a proof card"}
+</div></td>
 </tr>`;
 });
 }
 
-function selectStep(i,el){
-document.querySelectorAll(".step").forEach(s=>s.classList.remove("selected"));
+function selectCard(el){
+document.querySelectorAll(".proof-card").forEach(c=>c.classList.remove("selected"));
 el.classList.add("selected");
-selectedStep=[el.dataset.statement,el.dataset.reason];
-selectedIndex=i;
+selected=[el.dataset.statement,el.dataset.reason];
 }
 
-function placeStep(i){
-if(!selectedStep){
-alert("Select a proof step first.");
-return;
-}
-slots[i]=selectedStep;
+function place(i){
+if(!selected){alert("Select a proof card first.");return;}
+slots[i]=selected;
 renderSlots();
 }
 
+function same(a,b){return a&&b&&a[0]===b[0]&&a[1]===b[1];}
+
 function checkProof(){
-const answer=proofs[current].answer;
-const ok=slots.every((s,i)=>s && s[0]===answer[i][0] && s[1]===answer[i][1]);
+const p=proofs[current];
+let ok=true;
+let messages=[];
+
+document.querySelectorAll(".slot").forEach(s=>s.classList.remove("correct","incorrect"));
+
+const givenSlots=slots.slice(0,p.givens.length);
+const requiredGivens=p.givens;
+
+let used=Array(requiredGivens.length).fill(false);
+
+givenSlots.forEach((s,i)=>{
+let match=-1;
+requiredGivens.forEach((g,j)=>{
+if(!used[j]&&same(s,g)) match=j;
+});
+if(match>=0){
+used[match]=true;
+document.getElementById("slot"+i).classList.add("correct");
+}else{
+ok=false;
+document.getElementById("slot"+i).classList.add("incorrect");
+}
+});
+
+const congruenceIndex=p.givens.length;
+const conclusionIndex=p.givens.length+1;
+
+if(same(slots[congruenceIndex],p.congruence)){
+document.getElementById("slot"+congruenceIndex).classList.add("correct");
+}else{
+ok=false;
+document.getElementById("slot"+congruenceIndex).classList.add("incorrect");
+messages.push("The triangle congruence statement must come after the givens.");
+}
+
+if(same(slots[conclusionIndex],p.conclusion)){
+document.getElementById("slot"+conclusionIndex).classList.add("correct");
+}else{
+ok=false;
+document.getElementById("slot"+conclusionIndex).classList.add("incorrect");
+messages.push("Corresponding parts should be used only after the triangles are proven congruent.");
+}
+
 const f=document.getElementById("feedback");
 if(ok){
 f.className="feedback correct";
-f.innerHTML="✅ Correct! Your proof is in a logical order. Every statement is supported by a valid reason.";
+f.innerHTML="✅ Proof accepted! Your givens support the congruence statement, and your final conclusion uses corresponding parts correctly.";
 }else{
 f.className="feedback incorrect";
-f.innerHTML="🔎 Not quite yet. Check the order: givens usually come first, the triangle congruence statement comes next, and corresponding parts come after the triangles are proven congruent.";
+f.innerHTML="🔎 Not quite yet. Check the red rows. The givens may be in any order, but the congruence statement must come next, and corresponding parts must come last.";
 }
 }
 
-function clearProof(){
-slots=Array(proofs[current].answer.length).fill(null);
-renderSlots();
-hideFeedback();
-}
-
+function clearProof(){slots=Array(proofs[current].givens.length+2).fill(null);renderSlots();hideFeedback();}
 function nextProof(){
-if(current<proofs.length-1){
-current++;
-loadProof();
-}else{
-document.querySelector(".container").innerHTML=`
-<div class="hero">
-<h1>🏆 Proof Builder Complete</h1>
-<p>You built all five proofs.</p>
-</div>
+if(current<proofs.length-1){current++;load();}
+else finish();
+}
+function restart(){if(confirm("Restart Proof Builder?")){current=0;load();}}
+function hideFeedback(){const f=document.getElementById("feedback");f.style.display="none";f.className="feedback";f.innerHTML="";}
+function finish(){
+document.getElementById("app").innerHTML=`
+<div class="hero"><h1>🏆 Proof Builder Complete</h1><p>You completed all five investigations.</p></div>
 <div class="card green" style="text-align:center;">
 <h2 style="color:#0f2d44;">Completion Code</h2>
-<p style="font-size:24px;background:#0f2d44;color:white;display:inline-block;padding:12px 18px;border-radius:8px;">PROOF-BUILDER-5</p>
+<p class="code">PROOF-BUILDER-5</p>
 <p>Write this code down if your teacher asks for it.</p>
 <button onclick="location.reload()">Restart Activity</button>
 </div>`;
 }
+
+function diagram(type){
+return `
+<svg width="620" height="310" viewBox="0 0 620 310" role="img" aria-label="${type.toUpperCase()} proof diagram">
+<rect width="620" height="310" fill="#fff"/>
+<polygon points="80,230 210,230 140,70" fill="#eefaf1" stroke="#0f2d44" stroke-width="4"/>
+<polygon points="390,230 520,230 450,70" fill="#f0f7fb" stroke="#0f2d44" stroke-width="4"/>
+<text x="80" y="255" font-size="18" font-weight="bold" fill="#0f2d44">A</text>
+<text x="210" y="255" font-size="18" font-weight="bold" fill="#0f2d44">B</text>
+<text x="140" y="60" font-size="18" font-weight="bold" fill="#0f2d44">C</text>
+<text x="390" y="255" font-size="18" font-weight="bold" fill="#0f2d44">D</text>
+<text x="520" y="255" font-size="18" font-weight="bold" fill="#0f2d44">E</text>
+<text x="450" y="60" font-size="18" font-weight="bold" fill="#0f2d44">F</text>
+${marks(type)}
+<text x="310" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f2d44">${type.toUpperCase()} Evidence</text>
+</svg>`;
 }
 
-function restart(){
-if(confirm("Restart the activity?")){
-current=0;
-loadProof();
-}
+function marks(type){
+if(type==="sss")return `
+<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>
+<line x1="115" y1="150" x2="127" y2="155" stroke="#f2b705" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="#f2b705" stroke-width="4"/>
+<line x1="175" y1="150" x2="187" y2="145" stroke="#9c64a6" stroke-width="4"/><line x1="485" y1="150" x2="497" y2="145" stroke="#9c64a6" stroke-width="4"/>`;
+if(type==="sas")return `
+<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>
+<line x1="115" y1="150" x2="127" y2="155" stroke="#f2b705" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="#f2b705" stroke-width="4"/>
+<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>`;
+if(type==="asa")return `
+<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>
+<path d="M185 230 A35 35 0 0 0 199 190" fill="none" stroke="#9c64a6" stroke-width="4"/><path d="M495 230 A35 35 0 0 0 509 190" fill="none" stroke="#9c64a6" stroke-width="4"/>
+<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>`;
+if(type==="aas")return `
+<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>
+<path d="M150 95 A28 28 0 0 1 175 125" fill="none" stroke="#9c64a6" stroke-width="4"/><path d="M460 95 A28 28 0 0 1 485 125" fill="none" stroke="#9c64a6" stroke-width="4"/>
+<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>`;
+return "";
 }
 
-function hideFeedback(){
-const f=document.getElementById("feedback");
-f.style.display="none";
-f.className="feedback";
-f.innerHTML="";
-}
-
-loadProof();
+load();
 </script>
 </body>
 </html>
