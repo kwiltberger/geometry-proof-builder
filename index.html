@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Proof Builder</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f0f7fb;color:#1f2933;margin:0;padding:20px}
+.container{max-width:1100px;margin:0 auto}
+.hero{background:#0f2d44;color:white;padding:24px;border-radius:12px;text-align:center}
+.card{background:white;border-left:6px solid #2f80a8;padding:18px;border-radius:10px;margin-top:18px}
+.green{background:#eefaf1;border-left-color:#3ca65c}
+.yellow{background:#fff8e6;border-left-color:#f2b705}
+.purple{background:#f3e5f5;border-left-color:#9c64a6}
+button{background:#0f2d44;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin:6px}
+button:hover{background:#163d5c}
+.step{background:white;border:2px solid #d6e6ef;border-radius:8px;padding:10px;margin:8px 0;cursor:pointer}
+.step.selected{border-color:#2f80a8;background:#f0f7fb}
+.slot{min-height:42px;background:#f6f9fb;border:2px dashed #b8c7d1;border-radius:8px;padding:10px;margin:8px 0}
+.feedback{display:none;padding:14px;border-radius:8px;margin-top:12px;font-weight:bold}
+.correct{display:block;background:#eefaf1;color:#1f6b35;border-left:6px solid #3ca65c}
+.incorrect{display:block;background:#fdecea;color:#8a1f11;border-left:6px solid #c0392b}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th{background:#0f2d44;color:white}
+th,td{border:1px solid #d6e6ef;padding:10px}
+.progress{height:18px;background:#d6e6ef;border-radius:999px;overflow:hidden}
+.fill{height:100%;width:0%;background:#3ca65c}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+<h1>🧩 Proof Builder</h1>
+<p>Build geometric proofs one logical step at a time.</p>
+</div>
+
+<div class="card">
+<h2 style="color:#0f2d44;margin-top:0;">Directions</h2>
+<p>Select a proof step, then select the slot where it belongs. Build the proof in the correct order.</p>
+<p>When all slots are filled, check your proof.</p>
+</div>
+
+<div class="card yellow">
+<h2 id="caseTitle" style="color:#0f2d44;margin-top:0;">Proof 1</h2>
+<p id="casePrompt"></p>
+<div class="progress"><div class="fill" id="fill"></div></div>
+<p id="progressText">Proof 1 of 5</p>
+</div>
+
+<div class="card green">
+<h2 style="color:#0f2d44;margin-top:0;">Available Proof Steps</h2>
+<div id="steps"></div>
+</div>
+
+<div class="card purple">
+<h2 style="color:#0f2d44;margin-top:0;">Build the Proof</h2>
+<table>
+<tr><th>#</th><th>Statement</th><th>Reason</th></tr>
+<tbody id="proofSlots"></tbody>
+</table>
+<button onclick="checkProof()">Check Proof</button>
+<button onclick="clearProof()">Clear Proof</button>
+<button onclick="nextProof()">Next Proof</button>
+<button onclick="restart()">Restart</button>
+<div id="feedback" class="feedback"></div>
+</div>
+
+<div class="card">
+<h2 style="color:#0f2d44;margin-top:0;">Proof Builder Tips</h2>
+<p>☐ Start with the givens.</p>
+<p>☐ Use SSS, SAS, ASA, or AAS to prove triangles congruent.</p>
+<p>☐ Use corresponding parts only after triangles are proven congruent.</p>
+</div>
+
+</div>
+
+<script>
+const proofs=[
+{
+title:"Proof 1: SAS Proof",
+prompt:"Given AB ≅ DE, BC ≅ EF, and ∠B ≅ ∠E. Prove AC ≅ DF.",
+answer:[
+["AB ≅ DE","Given"],
+["BC ≅ EF","Given"],
+["∠B ≅ ∠E","Given"],
+["△ABC ≅ △DEF","SAS"],
+["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
+]
+},
+{
+title:"Proof 2: SSS Proof",
+prompt:"Given MN ≅ QR, NP ≅ RS, and MP ≅ QS. Prove ∠N ≅ ∠R.",
+answer:[
+["MN ≅ QR","Given"],
+["NP ≅ RS","Given"],
+["MP ≅ QS","Given"],
+["△MNP ≅ △QRS","SSS"],
+["∠N ≅ ∠R","Corresponding parts of congruent triangles are congruent"]
+]
+},
+{
+title:"Proof 3: ASA Proof",
+prompt:"Given ∠A ≅ ∠D, AB ≅ DE, and ∠B ≅ ∠E. Prove AC ≅ DF.",
+answer:[
+["∠A ≅ ∠D","Given"],
+["AB ≅ DE","Given"],
+["∠B ≅ ∠E","Given"],
+["△ABC ≅ △DEF","ASA"],
+["AC ≅ DF","Corresponding parts of congruent triangles are congruent"]
+]
+},
+{
+title:"Proof 4: AAS Proof",
+prompt:"Given ∠J ≅ ∠L, ∠K ≅ ∠M, and JN ≅ LP. Prove JK ≅ LM.",
+answer:[
+["∠J ≅ ∠L","Given"],
+["∠K ≅ ∠M","Given"],
+["JN ≅ LP","Given"],
+["△JKN ≅ △LMP","AAS"],
+["JK ≅ LM","Corresponding parts of congruent triangles are congruent"]
+]
+},
+{
+title:"Proof 5: Find the Logical Flow",
+prompt:"Given two pairs of sides and the included angle are congruent. Prove a corresponding side is congruent.",
+answer:[
+["First pair of corresponding sides is congruent","Given"],
+["Second pair of corresponding sides is congruent","Given"],
+["Included angles are congruent","Given"],
+["The triangles are congruent","SAS"],
+["The corresponding final sides are congruent","Corresponding parts of congruent triangles are congruent"]
+]
+}
+];
+
+let current=0;
+let selectedStep=null;
+let selectedIndex=null;
+let slots=[];
+
+function shuffle(arr){
+return arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+}
+
+function loadProof(){
+const p=proofs[current];
+document.getElementById("caseTitle").textContent=p.title;
+document.getElementById("casePrompt").textContent=p.prompt;
+document.getElementById("progressText").textContent=`Proof ${current+1} of ${proofs.length}`;
+document.getElementById("fill").style.width=((current)/proofs.length*100)+"%";
+slots=Array(p.answer.length).fill(null);
+selectedStep=null;
+selectedIndex=null;
+
+const mixed=shuffle([...p.answer]);
+document.getElementById("steps").innerHTML=mixed.map((s,i)=>
+`<div class="step" onclick="selectStep(${i}, this)" data-statement="${s[0]}" data-reason="${s[1]}"><strong>${s[0]}</strong><br><em>${s[1]}</em></div>`
+).join("");
+
+renderSlots();
+hideFeedback();
+}
+
+function renderSlots(){
+const tbody=document.getElementById("proofSlots");
+tbody.innerHTML="";
+slots.forEach((slot,i)=>{
+tbody.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td colspan="2">
+<div class="slot" onclick="placeStep(${i})">
+${slot?`<strong>${slot[0]}</strong><br><em>${slot[1]}</em>`:"Click here to place a proof step"}
+</div>
+</td>
+</tr>`;
+});
+}
+
+function selectStep(i,el){
+document.querySelectorAll(".step").forEach(s=>s.classList.remove("selected"));
+el.classList.add("selected");
+selectedStep=[el.dataset.statement,el.dataset.reason];
+selectedIndex=i;
+}
+
+function placeStep(i){
+if(!selectedStep){
+alert("Select a proof step first.");
+return;
+}
+slots[i]=selectedStep;
+renderSlots();
+}
+
+function checkProof(){
+const answer=proofs[current].answer;
+const ok=slots.every((s,i)=>s && s[0]===answer[i][0] && s[1]===answer[i][1]);
+const f=document.getElementById("feedback");
+if(ok){
+f.className="feedback correct";
+f.innerHTML="✅ Correct! Your proof is in a logical order. Every statement is supported by a valid reason.";
+}else{
+f.className="feedback incorrect";
+f.innerHTML="🔎 Not quite yet. Check the order: givens usually come first, the triangle congruence statement comes next, and corresponding parts come after the triangles are proven congruent.";
+}
+}
+
+function clearProof(){
+slots=Array(proofs[current].answer.length).fill(null);
+renderSlots();
+hideFeedback();
+}
+
+function nextProof(){
+if(current<proofs.length-1){
+current++;
+loadProof();
+}else{
+document.querySelector(".container").innerHTML=`
+<div class="hero">
+<h1>🏆 Proof Builder Complete</h1>
+<p>You built all five proofs.</p>
+</div>
+<div class="card green" style="text-align:center;">
+<h2 style="color:#0f2d44;">Completion Code</h2>
+<p style="font-size:24px;background:#0f2d44;color:white;display:inline-block;padding:12px 18px;border-radius:8px;">PROOF-BUILDER-5</p>
+<p>Write this code down if your teacher asks for it.</p>
+<button onclick="location.reload()">Restart Activity</button>
+</div>`;
+}
+}
+
+function restart(){
+if(confirm("Restart the activity?")){
+current=0;
+loadProof();
+}
+}
+
+function hideFeedback(){
+const f=document.getElementById("feedback");
+f.style.display="none";
+f.className="feedback";
+f.innerHTML="";
+}
+
+loadProof();
+</script>
+</body>
+</html>
