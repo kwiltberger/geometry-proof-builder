@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Proof Builder: Congruence Investigations</title>
+<title>Complete the Proof</title>
 <style>
 :root{
 --navy:#0f2d44;--blue:#2f80a8;--ltblue:#f0f7fb;--green:#3ca65c;--ltgreen:#eefaf1;
@@ -19,24 +19,22 @@ body{font-family:Arial,sans-serif;background:#f0f7fb;color:var(--text);margin:0;
 .purple{background:var(--ltpurple);border-left-color:var(--purple)}
 button{background:var(--navy);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin:6px}
 button:hover{background:#163d5c}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
 .diagram{background:white;border:1px solid var(--gray);border-radius:10px;text-align:center;padding:10px;overflow-x:auto}
 svg{max-width:100%;height:auto}
-.proof-card{background:white;border:2px solid var(--gray);border-radius:8px;padding:10px;margin:8px 0;cursor:grab}
-.proof-card.selected{border-color:var(--blue);background:var(--ltblue)}
-.slot{min-height:50px;background:#f6f9fb;border:2px dashed #b8c7d1;border-radius:8px;padding:10px}
-.slot.correct{background:var(--ltgreen);border-color:var(--green)}
-.slot.incorrect{background:var(--ltred);border-color:var(--red)}
-table{width:100%;border-collapse:collapse}
+table{width:100%;border-collapse:collapse;margin-top:10px}
 th{background:var(--navy);color:white}
-th,td{border:1px solid var(--gray);padding:10px;vertical-align:top}
+th,td{border:1px solid var(--gray);padding:10px;vertical-align:middle}
+tr:nth-child(even){background:#f6f9fb}
+select{width:100%;padding:8px;border-radius:6px;border:1px solid #b8c7d1;font-size:15px}
 .feedback{display:none;padding:14px;border-radius:8px;margin-top:12px;font-weight:bold}
 .feedback.correct{display:block;background:var(--ltgreen);color:#1f6b35;border-left:6px solid var(--green)}
 .feedback.incorrect{display:block;background:var(--ltred);color:#8a1f11;border-left:6px solid var(--red)}
 .progress{height:18px;background:#d6e6ef;border-radius:999px;overflow:hidden}
 .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--blue))}
 .code{background:var(--navy);color:white;padding:12px 18px;border-radius:8px;display:inline-block;font-size:22px}
+.blank{background:#fff8e6}
 </style>
 </head>
 
@@ -44,15 +42,15 @@ th,td{border:1px solid var(--gray);padding:10px;vertical-align:top}
 <div class="container" id="app">
 
 <div class="hero">
-<h1>🧩 Proof Builder: Congruence Investigations</h1>
-<p>Build proofs that show triangles are congruent.</p>
+<h1>🧩 Complete the Proof</h1>
+<p>Use evidence, properties, and congruence theorems to complete each proof.</p>
 </div>
 
 <div class="card">
 <h2 style="margin-top:0;color:var(--navy)">Directions</h2>
-<p>Select a proof card, then click the slot where it belongs.</p>
-<p><strong>Important:</strong> Given/evidence statements may be placed in any order. The final triangle congruence statement must come last.</p>
-<p>This activity focuses on proving triangles congruent using <strong>SSS, SAS, ASA, AAS</strong>, and one triangle/quadrilateral proof.</p>
+<p>Each investigation shows a geometry diagram and a partially completed proof.</p>
+<p>Use the dropdown menus to complete the missing statement or reason.</p>
+<p>Some proofs require more than just SSS, SAS, ASA, or AAS. Watch for properties such as <strong>Reflexive Property</strong>, <strong>Vertical Angles</strong>, <strong>Substitution</strong>, and <strong>CPCTC</strong>.</p>
 </div>
 
 <div class="card yellow">
@@ -63,112 +61,130 @@ th,td{border:1px solid var(--gray);padding:10px;vertical-align:top}
 </div>
 
 <div class="grid">
-<div>
 <div class="card">
 <h2 style="margin-top:0;color:var(--navy)">Diagram</h2>
 <div class="diagram" id="diagram"></div>
 </div>
 
-<div class="card green">
-<h2 style="margin-top:0;color:var(--navy)">Proof Cards</h2>
-<div id="cards"></div>
-</div>
-</div>
-
-<div>
 <div class="card purple">
-<h2 style="margin-top:0;color:var(--navy)">Build the Proof</h2>
-<table>
-<thead>
-<tr><th>#</th><th>Statement and Reason</th></tr>
-</thead>
-<tbody id="slots"></tbody>
-</table>
-
+<h2 style="margin-top:0;color:var(--navy)">Complete the Proof</h2>
+<div id="proofTable"></div>
 <button onclick="checkProof()">Check Proof</button>
-<button onclick="clearProof()">Clear Proof</button>
+<button onclick="showHint()">Hint</button>
 <button onclick="nextProof()">Next Investigation</button>
 <button onclick="restart()">Restart</button>
-
 <div id="feedback" class="feedback"></div>
 </div>
 </div>
-</div>
 
-<div class="card">
-<h2 style="margin-top:0;color:var(--navy)">Proof Builder Reminders</h2>
-<p>☐ Start with the evidence.</p>
-<p>☐ Use the evidence to choose SSS, SAS, ASA, or AAS.</p>
-<p>☐ Do not use corresponding parts unless the proof asks for a conclusion after congruence.</p>
-<p>☐ For quadrilaterals, use properties such as opposite sides of a parallelogram or the reflexive property.</p>
+<div class="card green">
+<h2 style="margin-top:0;color:var(--navy)">Proof Reminders</h2>
+<p>☐ Givens are the starting evidence.</p>
+<p>☐ Use properties to create additional evidence when needed.</p>
+<p>☐ Prove triangles congruent before using CPCTC.</p>
+<p>☐ CPCTC means corresponding parts of congruent triangles are congruent.</p>
 </div>
 
 </div>
 
 <script>
+const choices = [
+"Given",
+"SSS",
+"SAS",
+"ASA",
+"AAS",
+"CPCTC",
+"Reflexive Property",
+"Vertical Angles Theorem",
+"Segment Addition Postulate",
+"Angle Addition Postulate",
+"Substitution",
+"Transitive Property of Equality",
+"Opposite sides of a parallelogram are congruent",
+"Definition of midpoint"
+];
+
+const statementChoices = [
+"△ABC ≅ △DEF",
+"△HIJ ≅ △GFK",
+"△ABC ≅ △CDA",
+"AC ≅ DF",
+"HJ = GK",
+"AC ≅ AC",
+"∠BCA ≅ ∠DCA",
+"∠ABC ≅ ∠CDA"
+];
+
 const proofs=[
 {
-title:"Investigation 1: Prove Triangles Congruent by SSS",
-prompt:"Given AB ≅ DE, BC ≅ EF, and AC ≅ DF. Prove △ABC ≅ △DEF.",
-type:"sss",
-evidence:[
-["AB ≅ DE","Given"],
-["BC ≅ EF","Given"],
-["AC ≅ DF","Given"]
-],
-congruence:["△ABC ≅ △DEF","SSS"]
-},
-{
-title:"Investigation 2: Prove Triangles Congruent by SAS",
-prompt:"Given AB ≅ DE, BC ≅ EF, and ∠B ≅ ∠E. Prove △ABC ≅ △DEF.",
+title:"Investigation 1: Missing Congruence Reason",
+prompt:"Complete the proof that △ABC ≅ △DEF.",
 type:"sas",
-evidence:[
+rows:[
 ["AB ≅ DE","Given"],
 ["BC ≅ EF","Given"],
-["∠B ≅ ∠E","Given"]
+["∠B ≅ ∠E","Given"],
+["△ABC ≅ △DEF",{answer:"SAS",type:"reason"}]
 ],
-congruence:["△ABC ≅ △DEF","SAS"]
+hint:"The marked angle is between the two marked sides."
 },
 {
-title:"Investigation 3: Prove Triangles Congruent by ASA",
-prompt:"Given ∠A ≅ ∠D, AB ≅ DE, and ∠B ≅ ∠E. Prove △ABC ≅ △DEF.",
+title:"Investigation 2: Missing Congruence Statement",
+prompt:"Complete the proof using the three pairs of congruent sides.",
+type:"sss",
+rows:[
+["AB ≅ DE","Given"],
+["BC ≅ EF","Given"],
+["AC ≅ DF","Given"],
+[{answer:"△ABC ≅ △DEF",type:"statement"},"SSS"]
+],
+hint:"Three corresponding sides prove the triangles congruent."
+},
+{
+title:"Investigation 3: CPCTC After Congruence",
+prompt:"Complete the proof that AC ≅ DF.",
 type:"asa",
-evidence:[
+rows:[
 ["∠A ≅ ∠D","Given"],
 ["AB ≅ DE","Given"],
-["∠B ≅ ∠E","Given"]
+["∠B ≅ ∠E","Given"],
+["△ABC ≅ △DEF","ASA"],
+["AC ≅ DF",{answer:"CPCTC",type:"reason"}]
 ],
-congruence:["△ABC ≅ △DEF","ASA"]
+hint:"Once triangles are proven congruent, corresponding sides and angles are congruent."
 },
 {
-title:"Investigation 4: Prove Triangles Congruent by AAS",
-prompt:"Given ∠J ≅ ∠L, ∠K ≅ ∠M, and JN ≅ LP. Prove △JKN ≅ △LMP.",
-type:"aas",
-evidence:[
-["∠J ≅ ∠L","Given"],
-["∠K ≅ ∠M","Given"],
-["JN ≅ LP","Given"]
-],
-congruence:["△JKN ≅ △LMP","AAS"]
-},
-{
-title:"Investigation 5: Triangles and Quadrilaterals",
-prompt:"Given ABCD is a parallelogram with diagonal AC. Prove △ABC ≅ △CDA.",
+title:"Investigation 4: Triangles and Quadrilaterals",
+prompt:"Given ABCD is a parallelogram with diagonal AC. Complete the proof that △ABC ≅ △CDA.",
 type:"quad",
-evidence:[
+rows:[
 ["AB ≅ CD","Opposite sides of a parallelogram are congruent"],
 ["BC ≅ DA","Opposite sides of a parallelogram are congruent"],
-["AC ≅ AC","Reflexive Property"]
+["AC ≅ AC",{answer:"Reflexive Property",type:"reason"}],
+["△ABC ≅ △CDA","SSS"]
 ],
-congruence:["△ABC ≅ △CDA","SSS"]
+hint:"The diagonal AC is shared by both triangles."
+},
+{
+title:"Investigation 5: Segment Addition and Substitution",
+prompt:"Complete the proof that △HIJ ≅ △GFK.",
+type:"complex",
+rows:[
+["∠FGK ≅ ∠IHJ","Given"],
+["∠HJI ≅ ∠FKG","Given"],
+["JK ≅ GH","Given"],
+["GK = JK + GJ","Segment Addition Postulate"],
+["HJ = GH + GJ","Segment Addition Postulate"],
+["GK = GH + GJ",{answer:"Substitution",type:"reason"}],
+["HJ = GK","Transitive Property of Equality"],
+["△HIJ ≅ △GFK",{answer:"AAS",type:"reason"}]
+],
+hint:"The side HJ is proven congruent to GK, and the proof already has two angle pairs."
 }
 ];
 
 let current=0;
-let selected=null;
-let slots=[];
-
-function shuffle(a){return a.map(x=>[Math.random(),x]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);}
 
 function load(){
 const p=proofs[current];
@@ -177,100 +193,100 @@ document.getElementById("prompt").textContent=p.prompt;
 document.getElementById("progressText").textContent=`Investigation ${current+1} of ${proofs.length}`;
 document.getElementById("fill").style.width=(current/proofs.length*100)+"%";
 document.getElementById("diagram").innerHTML=diagram(p.type);
-slots=Array(p.evidence.length+1).fill(null);
-selected=null;
-
-const all=shuffle([...p.evidence,p.congruence]);
-document.getElementById("cards").innerHTML=all.map((c)=>`
-<div class="proof-card" onclick="selectCard(this)" data-statement="${c[0]}" data-reason="${c[1]}">
-<strong>${c[0]}</strong><br><em>${c[1]}</em>
-</div>`).join("");
-
-renderSlots();
+renderTable();
 hideFeedback();
 }
 
-function renderSlots(){
-const body=document.getElementById("slots");
-body.innerHTML="";
-slots.forEach((s,i)=>{
-body.innerHTML+=`
-<tr>
-<td>${i+1}</td>
-<td><div class="slot" onclick="place(${i})" id="slot${i}">
-${s?`<strong>${s[0]}</strong><br><em>${s[1]}</em>`:"Click here to place a proof card"}
-</div></td>
-</tr>`;
+function renderTable(){
+const p=proofs[current];
+let html=`<table><tr><th>#</th><th>Statement</th><th>Reason</th></tr>`;
+p.rows.forEach((row,i)=>{
+let statement=row[0];
+let reason=row[1];
+
+html+=`<tr><td>${i+1}</td>`;
+
+if(typeof statement==="object"){
+html+=`<td class="blank">${dropdown("statement",i)}</td>`;
+}else{
+html+=`<td>${statement}</td>`;
+}
+
+if(typeof reason==="object"){
+html+=`<td class="blank">${dropdown("reason",i)}</td>`;
+}else{
+html+=`<td>${reason}</td>`;
+}
+
+html+=`</tr>`;
 });
+html+=`</table>`;
+document.getElementById("proofTable").innerHTML=html;
 }
 
-function selectCard(el){
-document.querySelectorAll(".proof-card").forEach(c=>c.classList.remove("selected"));
-el.classList.add("selected");
-selected=[el.dataset.statement,el.dataset.reason];
+function dropdown(type,index){
+const list=type==="reason"?choices:statementChoices;
+return `<select id="blank-${index}-${type}">
+<option value="">Choose...</option>
+${list.map(c=>`<option value="${c}">${c}</option>`).join("")}
+</select>`;
 }
-
-function place(i){
-if(!selected){alert("Select a proof card first.");return;}
-slots[i]=selected;
-renderSlots();
-}
-
-function same(a,b){return a&&b&&a[0]===b[0]&&a[1]===b[1];}
 
 function checkProof(){
 const p=proofs[current];
-let ok=true;
-document.querySelectorAll(".slot").forEach(s=>s.classList.remove("correct","incorrect"));
+let correct=true;
+let missing=false;
 
-const evidenceSlots=slots.slice(0,p.evidence.length);
-let used=Array(p.evidence.length).fill(false);
-
-evidenceSlots.forEach((s,i)=>{
-let match=-1;
-p.evidence.forEach((g,j)=>{
-if(!used[j]&&same(s,g)) match=j;
-});
-if(match>=0){
-used[match]=true;
-document.getElementById("slot"+i).classList.add("correct");
-}else{
-ok=false;
-document.getElementById("slot"+i).classList.add("incorrect");
+p.rows.forEach((row,i)=>{
+["statement","reason"].forEach((type,idx)=>{
+const item=idx===0?row[0]:row[1];
+if(typeof item==="object"){
+const select=document.getElementById(`blank-${i}-${type}`);
+if(!select || select.value===""){
+missing=true;
+correct=false;
+}else if(select.value!==item.answer){
+correct=false;
+}
 }
 });
-
-const finalIndex=p.evidence.length;
-if(same(slots[finalIndex],p.congruence)){
-document.getElementById("slot"+finalIndex).classList.add("correct");
-}else{
-ok=false;
-document.getElementById("slot"+finalIndex).classList.add("incorrect");
-}
+});
 
 const f=document.getElementById("feedback");
-if(ok){
+if(missing){
+f.className="feedback incorrect";
+f.innerHTML="Choose an answer for every blank before checking your proof.";
+return;
+}
+if(correct){
 f.className="feedback correct";
-f.innerHTML="✅ Proof accepted! Your evidence supports the final triangle congruence statement.";
+f.innerHTML="✅ Correct! The proof is complete and the reasoning is valid.";
 }else{
 f.className="feedback incorrect";
-f.innerHTML="🔎 Not quite yet. Check the red rows. Evidence statements may be in any order, but the triangle congruence conclusion must come last.";
+f.innerHTML="🔎 Not quite yet. Check the missing statement or reason. Ask: What evidence has already been proven, and what conclusion follows?";
 }
 }
 
-function clearProof(){
-slots=Array(proofs[current].evidence.length+1).fill(null);
-renderSlots();
-hideFeedback();
+function showHint(){
+const f=document.getElementById("feedback");
+f.className="feedback incorrect";
+f.innerHTML="Hint: " + proofs[current].hint;
 }
 
 function nextProof(){
-if(current<proofs.length-1){current++;load();}
-else finish();
+if(current<proofs.length-1){
+current++;
+load();
+}else{
+finish();
+}
 }
 
 function restart(){
-if(confirm("Restart Proof Builder?")){current=0;load();}
+if(confirm("Restart the activity?")){
+current=0;
+load();
+}
 }
 
 function hideFeedback(){
@@ -282,10 +298,10 @@ f.innerHTML="";
 
 function finish(){
 document.getElementById("app").innerHTML=`
-<div class="hero"><h1>🏆 Proof Builder Complete</h1><p>You completed all five congruence investigations.</p></div>
+<div class="hero"><h1>🏆 Complete the Proof Finished</h1><p>You completed all five proof investigations.</p></div>
 <div class="card green" style="text-align:center;">
 <h2 style="color:#0f2d44;">Completion Code</h2>
-<p class="code">PROOF-BUILDER-5</p>
+<p class="code">PROOF-COMPLETE-5</p>
 <p>Write this code down if your teacher asks for it.</p>
 <button onclick="location.reload()">Restart Activity</button>
 </div>`;
@@ -293,71 +309,77 @@ document.getElementById("app").innerHTML=`
 
 function diagram(type){
 if(type==="quad") return quadDiagram();
+if(type==="complex") return complexDiagram();
 
 return `
-<svg width="620" height="310" viewBox="0 0 620 310" role="img" aria-label="${type.toUpperCase()} proof diagram">
+<svg width="620" height="310" viewBox="0 0 620 310" role="img">
 <rect width="620" height="310" fill="#fff"/>
-<polygon points="80,230 210,230 140,70" fill="#eefaf1" stroke="#0f2d44" stroke-width="4"/>
-<polygon points="390,230 520,230 450,70" fill="#f0f7fb" stroke="#0f2d44" stroke-width="4"/>
-<text x="80" y="255" font-size="18" font-weight="bold" fill="#0f2d44">A</text>
-<text x="210" y="255" font-size="18" font-weight="bold" fill="#0f2d44">B</text>
-<text x="140" y="60" font-size="18" font-weight="bold" fill="#0f2d44">C</text>
-<text x="390" y="255" font-size="18" font-weight="bold" fill="#0f2d44">D</text>
-<text x="520" y="255" font-size="18" font-weight="bold" fill="#0f2d44">E</text>
-<text x="450" y="60" font-size="18" font-weight="bold" fill="#0f2d44">F</text>
+<polygon points="80,230 210,230 140,70" fill="#ffffff" stroke="#1f9d23" stroke-width="4"/>
+<polygon points="390,230 520,230 450,70" fill="#ffffff" stroke="#1f9d23" stroke-width="4"/>
+<text x="80" y="255" font-size="20" font-weight="bold">A</text>
+<text x="210" y="255" font-size="20" font-weight="bold">B</text>
+<text x="140" y="60" font-size="20" font-weight="bold">C</text>
+<text x="390" y="255" font-size="20" font-weight="bold">D</text>
+<text x="520" y="255" font-size="20" font-weight="bold">E</text>
+<text x="450" y="60" font-size="20" font-weight="bold">F</text>
 ${marks(type)}
-<text x="310" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f2d44">${type.toUpperCase()} Evidence</text>
 </svg>`;
 }
 
 function marks(type){
 if(type==="sss")return `
-<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>
-<line x1="115" y1="150" x2="127" y2="155" stroke="#f2b705" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="#f2b705" stroke-width="4"/>
-<line x1="175" y1="150" x2="187" y2="145" stroke="#9c64a6" stroke-width="4"/><line x1="485" y1="150" x2="497" y2="145" stroke="#9c64a6" stroke-width="4"/>`;
-
+<line x1="145" y1="223" x2="145" y2="237" stroke="red" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="red" stroke-width="4"/>
+<line x1="115" y1="150" x2="127" y2="155" stroke="red" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="red" stroke-width="4"/>
+<line x1="175" y1="150" x2="187" y2="145" stroke="red" stroke-width="4"/><line x1="485" y1="150" x2="497" y2="145" stroke="red" stroke-width="4"/>`;
 if(type==="sas")return `
-<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>
-<line x1="115" y1="150" x2="127" y2="155" stroke="#f2b705" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="#f2b705" stroke-width="4"/>
-<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>`;
-
+<line x1="145" y1="223" x2="145" y2="237" stroke="red" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="red" stroke-width="4"/>
+<line x1="115" y1="150" x2="127" y2="155" stroke="red" stroke-width="4"/><line x1="425" y1="150" x2="437" y2="155" stroke="red" stroke-width="4"/>
+<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="red" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="red" stroke-width="4"/>`;
 if(type==="asa")return `
-<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>
-<path d="M185 230 A35 35 0 0 0 199 190" fill="none" stroke="#9c64a6" stroke-width="4"/><path d="M495 230 A35 35 0 0 0 509 190" fill="none" stroke="#9c64a6" stroke-width="4"/>
-<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>`;
-
-if(type==="aas")return `
-<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="#c0392b" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="#c0392b" stroke-width="4"/>
-<path d="M150 95 A28 28 0 0 1 175 125" fill="none" stroke="#9c64a6" stroke-width="4"/><path d="M460 95 A28 28 0 0 1 485 125" fill="none" stroke="#9c64a6" stroke-width="4"/>
-<line x1="145" y1="223" x2="145" y2="237" stroke="#3ca65c" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="#3ca65c" stroke-width="4"/>`;
-
+<path d="M105 230 A35 35 0 0 1 91 190" fill="none" stroke="red" stroke-width="4"/><path d="M415 230 A35 35 0 0 1 401 190" fill="none" stroke="red" stroke-width="4"/>
+<path d="M185 230 A35 35 0 0 0 199 190" fill="none" stroke="red" stroke-width="4"/><path d="M495 230 A35 35 0 0 0 509 190" fill="none" stroke="red" stroke-width="4"/>
+<line x1="145" y1="223" x2="145" y2="237" stroke="red" stroke-width="4"/><line x1="455" y1="223" x2="455" y2="237" stroke="red" stroke-width="4"/>`;
 return "";
 }
 
 function quadDiagram(){
 return `
-<svg width="620" height="330" viewBox="0 0 620 330" role="img" aria-label="Parallelogram proof diagram">
+<svg width="620" height="330" viewBox="0 0 620 330" role="img">
 <rect width="620" height="330" fill="#fff"/>
-<polygon points="150,230 410,230 500,90 240,90" fill="#f0f7fb" stroke="#0f2d44" stroke-width="4"/>
-<line x1="150" y1="230" x2="500" y2="90" stroke="#0f2d44" stroke-width="4"/>
-<text x="135" y="255" font-size="20" font-weight="bold" fill="#0f2d44">A</text>
-<text x="410" y="255" font-size="20" font-weight="bold" fill="#0f2d44">B</text>
-<text x="505" y="85" font-size="20" font-weight="bold" fill="#0f2d44">C</text>
-<text x="225" y="85" font-size="20" font-weight="bold" fill="#0f2d44">D</text>
+<polygon points="150,230 410,230 500,90 240,90" fill="#fff" stroke="#1f9d23" stroke-width="4"/>
+<line x1="150" y1="230" x2="500" y2="90" stroke="#1f9d23" stroke-width="4"/>
+<text x="135" y="255" font-size="20" font-weight="bold">A</text>
+<text x="410" y="255" font-size="20" font-weight="bold">B</text>
+<text x="505" y="85" font-size="20" font-weight="bold">C</text>
+<text x="225" y="85" font-size="20" font-weight="bold">D</text>
+<line x1="270" y1="222" x2="270" y2="238" stroke="red" stroke-width="4"/>
+<line x1="360" y1="82" x2="360" y2="98" stroke="red" stroke-width="4"/>
+<line x1="445" y1="155" x2="458" y2="163" stroke="red" stroke-width="4"/>
+<line x1="190" y1="155" x2="203" y2="163" stroke="red" stroke-width="4"/>
+</svg>`;
+}
 
-<!-- Opposite side marks -->
-<line x1="270" y1="222" x2="270" y2="238" stroke="#3ca65c" stroke-width="4"/>
-<line x1="360" y1="82" x2="360" y2="98" stroke="#3ca65c" stroke-width="4"/>
+function complexDiagram(){
+return `
+<svg width="620" height="420" viewBox="0 0 620 420" role="img">
+<rect width="620" height="420" fill="#fff"/>
+<polyline points="95,75 350,90 325,210 445,295 310,380 230,185 95,75" fill="none" stroke="#1f9d23" stroke-width="4"/>
+<line x1="95" y1="75" x2="445" y2="295" stroke="#1f9d23" stroke-width="4"/>
+<text x="70" y="75" font-size="22" font-weight="bold">H</text>
+<text x="365" y="92" font-size="22" font-weight="bold">I</text>
+<text x="325" y="220" font-size="22" font-weight="bold">J</text>
+<text x="448" y="310" font-size="22" font-weight="bold">K</text>
+<text x="295" y="400" font-size="22" font-weight="bold">F</text>
+<text x="210" y="185" font-size="22" font-weight="bold">G</text>
 
-<line x1="445" y1="155" x2="458" y2="163" stroke="#f2b705" stroke-width="4"/>
-<line x1="190" y1="155" x2="203" y2="163" stroke="#f2b705" stroke-width="4"/>
+<path d="M118 78 A38 38 0 0 1 112 115" fill="none" stroke="red" stroke-width="4"/>
+<path d="M246 192 A38 38 0 0 0 265 225" fill="none" stroke="red" stroke-width="4"/>
 
-<!-- Reflexive diagonal mark -->
-<line x1="315" y1="152" x2="328" y2="168" stroke="#9c64a6" stroke-width="4"/>
-<line x1="326" y1="148" x2="339" y2="164" stroke="#9c64a6" stroke-width="4"/>
+<path d="M318 196 A32 32 0 0 1 355 205" fill="none" stroke="red" stroke-width="4"/>
+<path d="M424 284 A32 32 0 0 1 442 255" fill="none" stroke="red" stroke-width="4"/>
 
-<text x="310" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f2d44">Parallelogram + Diagonal Evidence</text>
-<text x="310" y="305" text-anchor="middle" font-size="16" fill="#0f2d44">Use opposite sides of a parallelogram and AC ≅ AC.</text>
+<line x1="145" y1="110" x2="155" y2="122" stroke="red" stroke-width="4"/>
+<line x1="382" y1="256" x2="392" y2="268" stroke="red" stroke-width="4"/>
 </svg>`;
 }
 
